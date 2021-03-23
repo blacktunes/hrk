@@ -1,11 +1,19 @@
 <template>
-  <Select ref="select">
-    <div @click="reset" v-if="isRandom || isShowAll" class="icon">Select</div>
-    <div @click="setRandom" v-if="!isRandom" class="icon">Random</div>
-    <div @click="showAll" v-if="!isShowAll" class="icon">All</div>
-  </Select>
+  <Loading :ready="ready" />
+  <transition name="fade" appear>
+    <Select ref="select" v-show="ready">
+      <div @click="reset" v-if="isRandom || isShowAll" class="icon">Select</div>
+      <div @click="setRandom" v-if="!isRandom" class="icon">Random</div>
+      <div @click="showAll" v-if="!isShowAll" class="icon">All</div>
+    </Select>
+  </transition>
   <div class="home" :class="[isHorizontal ? 'horizontal' : 'vertical']">
     <div>
+      <img
+        class="img"
+        src="https://cdn.jsdelivr.net/gh/blacktunes/hrk/public/bg.jpg"
+        @load.once="loaded"
+      />
       <div
         v-if="!isRandom && !isShowAll"
         class="grids"
@@ -64,8 +72,9 @@ import { onMounted, ref } from 'vue'
 import Data from './assets/hrk.json'
 import Card from './components/Card.vue'
 import Select from './components/Select.vue'
+import Loading from './components/Loading.vue'
 
-const initDefault = () => {
+const initDefault = (ready) => {
   /** 是否显示选择卡片 */
   const isShow = ref(false)
   const selectIndex = ref(0)
@@ -81,6 +90,7 @@ const initDefault = () => {
   }
 
   const show = (key) => {
+    if (!ready.value) return
     isShow.value = true
     selectIndex.value = getIndex(key - 1)
   }
@@ -164,9 +174,15 @@ const initRandom = (num, r) => {
 export default {
   components: {
     Card,
-    Select
+    Select,
+    Loading
   },
   setup() {
+    const ready = ref(false)
+    const loaded = () => {
+      ready.value = true
+    }
+
     const select = ref()
 
     const isHorizontal = ref(true)
@@ -177,7 +193,7 @@ export default {
       window.onresize = getDirection
     })
 
-    const { selectIndex, isShow, show } = initDefault()
+    const { selectIndex, isShow, show } = initDefault(ready)
     const { isRandom, showList, initCard, remove } = initRandom(10, [2000, 8000])
 
     const reset = () => {
@@ -203,11 +219,11 @@ export default {
       select.value.showItem()
     }
 
-
-
     return {
       select,
       Data,
+      ready,
+      loaded,
       isHorizontal,
       selectIndex, isShow, show,
       isRandom, setRandom, showList, remove,
@@ -233,14 +249,16 @@ body
   font-weight bold
 
 .home
-  z-index -1
   position fixed
   top 0
   left 0
   height 100vh
   width 100vw
-  background url('/bg.jpg') center center no-repeat
-  background-size contain
+  display flex
+  align-items center
+
+  .img
+    z-index -1
 
 .grids
   display grid
@@ -310,13 +328,4 @@ body
 @media only screen and (min-width 900px)
   .all-card
     max-width 600px !important
-
-.fade-enter-active, .fade-leave-active
-  transition opacity 0.3s
-
-.fade-enter-from, .fade-leave-to
-  opacity 0
-
-.fade-enter-to, .fade-leave-from
-  opacity 1
 </style>
