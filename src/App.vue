@@ -290,6 +290,7 @@ body
   align-items center
 
   .all-card
+    z-index 3
     max-width 80%
 
 .random-list
@@ -302,6 +303,7 @@ body
   width 100vw
 
   .random-card
+    z-index 2
     opacity 0
     transition opacity 0.3s
 
