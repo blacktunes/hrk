@@ -15,15 +15,13 @@
   margin 10px 5px
   padding 10px
   border-radius 5px
-  border 1px solid #F5C1BB
-  background-color rgba(250, 219, 216, 0.6)
+  background-color rgba(250, 219, 216, 0.7)
   color #303133
   transition box-shadow 0.25s, background-color 0.2s
   user-select none
 
   &:hover
-    z-index 9
-    background-color rgba(250, 219, 216, 0.8) !important
+    background-color rgba(250, 219, 216, 0.9) !important
     box-shadow 2px 2px 5px rgba(0, 0, 0, 0.1)
 
   .card-text
