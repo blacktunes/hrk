@@ -337,7 +337,7 @@ body
     position fixed
     z-index 2
     opacity 0
-    transition opacity 0.4s ease-out, transform 0.5s ease-out, left 0.5s ease-out, top 0.5s ease-out
+    transition opacity 0.4s ease-in, transform 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.1), left 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.1), top 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.1)
     transform translate(-50%, -50%) scale(0, 0)
 
     &:hover
