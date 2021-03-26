@@ -19,7 +19,6 @@
   background-color rgba(250, 219, 216, 0.7)
   color #303133
   transition box-shadow 0.25s, background-color 0.2s
-  user-select none
 
   &:hover
     background-color rgba(250, 219, 216, 0.9) !important
