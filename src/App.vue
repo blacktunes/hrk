@@ -1,41 +1,47 @@
 <template>
-  <Loading :ready="ready"/>
-  <transition name="fade" appear>
-    <VSelect ref="select" v-show="ready">
-      <div @click="reset" v-if="isRandom || isShowAll" class="icon">Select</div>
-      <div @click="setRandom" v-if="!isRandom" class="icon">Random</div>
-      <div @click="showAll" v-if="!isShowAll" class="icon">All</div>
-    </VSelect>
+  <Loading :ready="ready" />
+  <transition name="in" appear>
+    <div v-if="ready">
+      <VSelect ref="select">
+        <div @click="reset" v-if="isRandom || isShowAll" class="icon">
+          Select
+        </div>
+        <div @click="setRandom" v-if="!isRandom" class="icon">Random</div>
+        <div @click="showAll" v-if="!isShowAll" class="icon">All</div>
+      </VSelect>
+    </div>
   </transition>
   <div class="home" :class="[isHorizontal ? 'horizontal' : 'vertical']">
     <div>
       <img
-          alt=""
-          class="img"
-          src="https://cdn.jsdelivr.net/gh/blacktunes/hrk/public/bg.jpg"
-          @load.once="loaded"
+        :style="{ filter: ready ? '' : 'blur(10px)' }"
+        alt=""
+        class="img"
+        src="https://cdn.jsdelivr.net/gh/blacktunes/hrk/public/bg.jpg"
+        @load.once="loaded"
       />
       <div
-          v-if="!isRandom && !isShowAll"
-          class="grids"
-          :style="{
+        v-if="!isRandom && !isShowAll"
+        class="grids"
+        :style="{
           width: isHorizontal ? 100 * (993 / 1105) + 'vh' : '100vw',
           height: isHorizontal ? '100vh' : 100 * (1105 / 993) + 'vw',
         }"
+        @mouseleave="hide"
       >
         <div
-            class="grid"
-            v-for="i in 4988"
-            :key="i"
-            @mouseenter="show(i)"
+          class="grid"
+          v-for="i in 4988"
+          :key="i"
+          @mouseenter="show(i)"
         ></div>
       </div>
     </div>
   </div>
   <div
-      class="card"
-      :style="{ opacity: isShow ? 1 : 0 }"
-      v-if="!isRandom && !isShowAll"
+    class="card"
+    :style="{ opacity: isShow ? 1 : 0 }"
+    v-if="!isRandom && !isShowAll"
   >
     <Card class="mid-card">
       {{ Data[selectIndex].text }}
@@ -53,13 +59,26 @@
     </transition>
   </template>
   <div
-      class="random-list"
-      :style="{ 'z-index': isRandom ? 1 : -1 }"
-      v-else-if="isRandom"
+    class="random-list"
+    :style="{ 'z-index': isRandom ? 1 : -1 }"
+    v-else-if="isRandom"
   >
     <template v-for="(item, key) in showList" :key="'random' + key">
-      <div class="random-card"
-           :style="{'z-index': item.index, top: item.y, left: item.x, opacity: item.show === 2 ? 1 : 0, transform: item.show !== 1 ? 'translate(-50%, -50%) scale(1, 1)' : 'translate(-50%, -50%) scale(0, 0)' }">
+      <div
+        @mouseover="moveIn(key)"
+        @mouseleave="moveOut(key)"
+        class="random-card"
+        :style="{
+          'z-index': item.index,
+          top: item.y,
+          left: item.x,
+          opacity: item.show === 2 ? 1 : 0,
+          transform:
+            item.show !== 1
+              ? 'translate(-50%, -50%) scale(1, 1)'
+              : 'translate(-50%, -50%) scale(0, 0)',
+        }"
+      >
         <Card>
           {{ item.text }}
           <template #name>{{ item.name }}</template>
@@ -70,7 +89,7 @@
 </template>
 
 <script>
-import {onMounted, ref} from 'vue'
+import { onMounted, ref } from 'vue'
 import Data from './assets/hrk.json'
 import Card from './components/Card.vue'
 import VSelect from './components/Select.vue'
@@ -97,10 +116,16 @@ const initDefault = (ready) => {
     selectIndex.value = getIndex(key - 1)
   }
 
+  const hide = () => {
+    if (!ready.value) return
+    isShow.value = false
+  }
+
   return {
     selectIndex,
     isShow,
-    show
+    show,
+    hide
   }
 }
 
@@ -131,47 +156,39 @@ const initRandom = (num, r, isHorizontal, pos) => {
       y: isHorizontal.value ? random(range[1][0], range[1][1]) + 'vh' : random(pos.start, pos.end),
       name: data.name,
       text: data.text,
-      index: i
+      index: i,
+      timer: null
     }
   }
 
-  let timers = {}
   const remove = () => {
-    for (const i in timers) {
-      clearTimeout(timers[i])
-      timers[i] = null
-    }
     for (const item of showList.value) {
+      clearTimeout(item.timer)
+      item.timer = null
       item.show = false
     }
-    timers = {}
   }
 
   const setTimer = (key, times) => {
-    if (timers) {
-      const time = Date.now()
-      timers[time] = setTimeout(() => {
-        ++showList.value[key].show
-        if (showList.value[key].show > 2) {
-          showList.value[key].show = 0
-        }
-        if (showList.value[key].show === 2) {
-          showList.value[key].index = 3
+    showList.value[key].timer = setTimeout(() => {
+      ++showList.value[key].show
+      if (showList.value[key].show > 2) {
+        showList.value[key].show = 0
+      }
+      if (showList.value[key].show === 2) {
+        showList.value[key].index = 3
 
-          showList.value[key].x = isHorizontal.value ? random(range[0][0], range[0][1]) + 'vw' : random(range[1][0], range[1][1]) + 'vh'
-          showList.value[key].y = isHorizontal.value ? random(range[1][0], range[1][1]) + 'vh' : random(range[0][0], range[0][1]) + 'vh'
-        } else if (showList.value[key].show === 1) {
-          showList.value[key].x = isHorizontal.value ? random(pos.start, pos.end) + 'px' : random(range[1][0], range[1][1]) + 'vw'
-          showList.value[key].y = isHorizontal.value ? random(range[1][0], range[1][1]) + 'vh' : random(pos.start, pos.end) + 'px'
-        } else {
-          showList.value[key].index = 2
-        }
-        if (timers) {
-          delete timers[time]
-        }
-        setTimer(key)
-      }, showList.value[key].show === 1 ? 300 : random(times ? times[0] : r[0], times ? times[1] : r[1]))
-    }
+        showList.value[key].x = isHorizontal.value ? random(range[0][0], range[0][1]) + 'vw' : random(range[1][0], range[1][1]) + 'vh'
+        showList.value[key].y = isHorizontal.value ? random(range[1][0], range[1][1]) + 'vh' : random(range[0][0], range[0][1]) + 'vh'
+      } else if (showList.value[key].show === 1) {
+        showList.value[key].x = isHorizontal.value ? random(pos.start, pos.end) + 'px' : random(range[1][0], range[1][1]) + 'vw'
+        showList.value[key].y = isHorizontal.value ? random(range[1][0], range[1][1]) + 'vh' : random(pos.start, pos.end) + 'px'
+      } else {
+        showList.value[key].index = 2
+      }
+      showList.value[key].timer = null
+      setTimer(key)
+    }, showList.value[key].show === 1 ? 300 : random(times ? times[0] : r[0], times ? times[1] : r[1]))
   }
 
   const initCard = () => {
@@ -180,11 +197,23 @@ const initRandom = (num, r, isHorizontal, pos) => {
     }
   }
 
+  const moveIn = (key) => {
+    clearTimeout(showList.value[key].timer)
+    showList.value[key].timer = null
+  }
+
+  const moveOut = (key) => {
+    setTimer(key, [0, 1500])
+  }
+
   return {
     isRandom,
     showList,
+    setTimer,
     initCard,
-    remove
+    remove,
+    moveIn,
+    moveOut
   }
 }
 
@@ -197,7 +226,9 @@ export default {
   setup() {
     const ready = ref(false)
     const loaded = () => {
-      ready.value = true
+      setTimeout(() => {
+        ready.value = true
+      }, 300)
     }
 
     const select = ref()
@@ -224,8 +255,8 @@ export default {
       window.onresize = getDirection
     })
 
-    const {selectIndex, isShow, show} = initDefault(ready)
-    const {isRandom, showList, initCard, remove} = initRandom(10, [1500, 5500], isHorizontal, pos)
+    const { selectIndex, isShow, show, hide } = initDefault(ready)
+    const { isRandom, showList, initCard, remove, moveIn, moveOut } = initRandom(10, [1500, 5500], isHorizontal, pos)
 
     const reset = () => {
       isShow.value = false
@@ -250,17 +281,21 @@ export default {
       select.value.showItem()
     }
 
+
+
     return {
       select,
       Data,
       ready,
       loaded,
       isHorizontal,
-      selectIndex, isShow, show,
+      selectIndex, isShow, show, hide,
       isRandom, setRandom, showList, remove,
       isShowAll,
       showAll,
-      reset
+      reset,
+      moveIn,
+      moveOut
     }
   }
 }
@@ -290,6 +325,8 @@ body
 
   .img
     z-index -1
+    transition filter 0.5s
+    transition-delay 0.25s
 
 .grids
   display grid
@@ -302,9 +339,12 @@ body
   left 50%
   transform translate(-50%, -50%)
 
-  .grid:hover
+  .grid
     box-sizing border-box
-    border 1px solid red
+    border 1px solid transparent
+
+    &:hover
+      border-color red
 
 .card
   position fixed
@@ -312,7 +352,7 @@ body
   left 50%
   transform translate(-50%, -50%)
   pointer-events none
-  transition opacity 0.3s
+  transition opacity 0.4s
 
 .all-list
   z-index 2

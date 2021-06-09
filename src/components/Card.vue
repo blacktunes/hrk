@@ -22,7 +22,7 @@
 
   &:hover
     background-color rgba(250, 219, 216, 0.9) !important
-    box-shadow 2px 2px 5px rgba(0, 0, 0, 0.1)
+    box-shadow 0px 0px 5px rgba(0, 0, 0, 0.3)
 
   .card-text
     text-align center

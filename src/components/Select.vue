@@ -55,6 +55,7 @@ export default {
   border-radius 30px
   overflow hidden
   transition height 0.2s
+  user-select none
 
   .menu-btn
     width 100%

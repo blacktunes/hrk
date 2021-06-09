@@ -1,22 +1,23 @@
 <template>
   <transition name="fade" appear>
     <div class="loading" v-if="!ready || show">
-      <div>
-        <span>L</span>
-        <span>o</span>
-        <span>a</span>
-        <span>d</span>
-        <span>i</span>
-        <span>n</span>
-        <span>g</span>
+      <div class="progress" :style="{ width: width }">
+        <div>
+          <span>L</span>
+          <span>o</span>
+          <span>a</span>
+          <span>d</span>
+          <span>i</span>
+          <span>n</span>
+          <span>g</span>
+        </div>
       </div>
-      <div class="progress" :style="{ width: width }"></div>
     </div>
   </transition>
 </template>
 
 <script>
-import { nextTick, ref, watch } from 'vue'
+import { ref, watch } from 'vue'
 
 export default {
   props: {
@@ -29,9 +30,9 @@ export default {
     watch(props, () => {
       if (props.ready) {
         width.value = '100% !important'
-        nextTick(() => {
+        setTimeout(() => {
           show.value = false
-        })
+        }, 500)
       }
     })
 
@@ -59,37 +60,45 @@ export default {
   user-select none
   font-size 30px
 
-  span
-    display inline-block
-    animation shake 2s infinite
-
-    &:nth-child(1)
-      animation-delay 0.5s
-
-    &:nth-child(2)
-      animation-delay 0.6s
-
-    &:nth-child(3)
-      animation-delay 0.7s
-
-    &:nth-child(4)
-      animation-delay 0.8s
-
-    &:nth-child(5)
-      animation-delay 0.9s
-
-    &:nth-child(6)
-      animation-delay 1s
-
-    &:nth-child(7)
-      animation-delay 1.1s
-
   .progress
+    display flex
+    align-items center
+    justify-content center
     width 0
     height 5px
-    background rgba(250, 219, 216, 0.8)
+    border-radius 5px
+    background rgb(250, 219, 216)
     transition width 0.2s
     transition-delay 0.5s
     animation progress 0.5s
     animation-fill-mode forwards
+    box-shadow 0px 0px 10px 2px rgba(250, 219, 216, 0.9)
+
+    div
+      padding-bottom 9px
+
+      span
+        display inline-block
+        animation shake 2s infinite
+
+        &:nth-child(1)
+          animation-delay 0.5s
+
+        &:nth-child(2)
+          animation-delay 0.6s
+
+        &:nth-child(3)
+          animation-delay 0.7s
+
+        &:nth-child(4)
+          animation-delay 0.8s
+
+        &:nth-child(5)
+          animation-delay 0.9s
+
+        &:nth-child(6)
+          animation-delay 1s
+
+        &:nth-child(7)
+          animation-delay 1.1s
 </style>
